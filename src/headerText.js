@@ -1,4 +1,4 @@
-const headerData = [
+export const headerData = [
   'Issue',
   [
     "开奖号码",

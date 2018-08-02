@@ -1,5 +1,5 @@
 /** 一區塊的一行資料 */
-class Section {
+export default class Section {
     /** 一區塊的一行資料 */
     constructor(arr) {
         /** (string) 調用特殊繪製function */

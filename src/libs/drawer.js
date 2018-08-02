@@ -1,4 +1,4 @@
-const Drawer = {
+export const Drawer = {
   drawCell(input) {
       const func = () => {}
       const { ctx, bgColor, tColor, text, fx, fy, width, height, offsetX = 0, drawBeforeText = func, drawAfterText = func, shouldWrapText = false } = input
@@ -240,7 +240,6 @@ const Drawer = {
           throw 'can\'t find hitNums in extraData.'
       }
       const drawLine = (from, to) => {
-        console.log('ft', from , to)
           if (!from || !to) return
           //draw lines
           const ctx = from.ctx
@@ -263,7 +262,6 @@ const Drawer = {
           ctx.stroke()
       }
       const drawBall = (hit) => {
-        console.log('hi', hit)
         if (typeof hit !== 'object') return
           //draw ball
           const ctx = hit.ctx
@@ -278,7 +276,6 @@ const Drawer = {
       }
 
       if (trendIsShowLine) {
-        console.log('hitNums', hitNums)
           for (const i in hitNums) {
               if (!hitNums.hasOwnProperty(i)) continue
               if (i > 0) {

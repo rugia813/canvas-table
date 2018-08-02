@@ -1,3 +1,4 @@
+import { CanvasTable, Section } from "./index";
 // mock api
 const fillArray = (times, fn) => [...Array(times).keys()].map(() => fn())
 const get1to9 = () => fillArray(5, () => Math.floor(Math.random() * 10)) // ['1', '6', '7', '7', '8']

@@ -1,3 +1,5 @@
+import { Drawer } from './drawer'
+import Section from './section'
 class CanvasTable {
   constructor(props) {
     this.cellWidth = props.cellWidth || 64
@@ -217,7 +219,6 @@ class CanvasTable {
     //                     : 0
     const allColWidth = this.width
     const totalUnsetCellWidth = allColWidth - settedCellWidth// - 18
-    console.log(settedCellWidth, allColWidth, totalUnsetCellWidth)
     let cellWidth = 0
     let missedWidth = 0
 
@@ -226,7 +227,6 @@ class CanvasTable {
     missedWidth = allColWidth - (cellWidth * tier2Count + settedCellWidth)
     missedWidth -= totalGridWidth
     // this.defaultCellWidth = cellWidth
-    console.log('celw', cellWidth, 'miss', missedWidth, 'tier2Count', tier2Count)
     // this.width -= missedWidth
     
     if (typeof this.cellWidth === 'object') {
@@ -249,3 +249,5 @@ class CanvasTable {
 }
 
 Object.assign(CanvasTable.prototype, Drawer)
+
+export default CanvasTable
