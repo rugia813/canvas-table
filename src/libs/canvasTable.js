@@ -13,12 +13,7 @@ class CanvasTable {
     
     this.headerText = props.headerText
     this.list = props.list
-    
-    this.extraData = {
-      lostCombos: [5, 15, 2, 8, 1],
-      numHeat: [3, 0, 2, 3, 2],
-      hitNums: [],
-    }
+    this.data = props.data
     
     this.defaultCellWidth = this.calcCellWidths()
     this.canvasArray = this.getCanvasArray()
@@ -157,7 +152,9 @@ class CanvasTable {
                   canvasIdx++
                   offsetY = 1
               }
-              offsetX += this[drawFunc]({ctx: ctxArr[canvasIdx], rowCodes: content, offsetX, offsetY, rowIdx, sectionIdx})
+              const cellWidth = this.getCellWidth(sectionIdx)
+              const cellHeight = this.cellHeight
+              offsetX += this[drawFunc]({ctx: ctxArr[canvasIdx], rowCodes: content, offsetX, offsetY, rowIdx, sectionIdx, cellWidth, cellHeight})
           } catch (e) {
               console.error(`error occured at "${this.headerText[sectionIdx - 1]}",\n draw function: "${drawFunc}"\n`, e)
           }

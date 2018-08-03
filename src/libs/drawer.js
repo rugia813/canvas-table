@@ -1,7 +1,7 @@
 export const Drawer = {
   drawCell(input) {
-      const func = () => {}
-      const { ctx, bgColor, tColor, text, fx, fy, width, height, offsetX = 0, drawBeforeText = func, drawAfterText = func, shouldWrapText = false } = input
+      const noop = () => {}
+      const { ctx, bgColor, tColor, text, fx, fy, width, height, offsetX = 0, drawBeforeText = noop, drawAfterText = noop, shouldWrapText = false } = input
       //bg
       ctx.fillStyle = bgColor
       ctx.fillRect(fx, fy, width, height)
@@ -52,9 +52,7 @@ export const Drawer = {
   },
   
   /** 繪製單一層的格子 */
-  drawSingleColumnCell({ctx, rowCodes, offsetX, offsetY, rowIdx, sectionIdx}) {
-      const cellWidth = this.getCellWidth(sectionIdx)
-      const cellHeight = this.cellHeight
+  drawSingleColumnCell({ctx, rowCodes, offsetX, offsetY, rowIdx, sectionIdx, cellWidth, cellHeight}) {
       let cell, tColor, text
       if (typeof rowCodes !== 'object') {
           text = rowCodes
@@ -77,9 +75,7 @@ export const Drawer = {
       return cellWidth + 1
   },
   /** 繪製球號格 */
-  drawBallCell({ctx, rowCodes, offsetX, offsetY, rowIdx, sectionIdx}) {
-    const cellWidth = this.getCellWidth(sectionIdx)
-    const cellHeight = this.cellHeight
+  drawBallCell({ctx, rowCodes, offsetX, offsetY, rowIdx, sectionIdx, cellWidth, cellHeight}) {
 
     const drawCircle = () => {
         const x = offsetX + ((cellWidth - 1/*gridOffset*/) / 2)
@@ -98,17 +94,15 @@ export const Drawer = {
     return this.drawMultiSubColumnCell({ctx, rowCodes, offsetX, offsetY, rowIdx, sectionIdx, drawCellParams})
   },
   /** 繪製帶遺漏條的格子 */
-  drawLostLineStatusCell({ctx, rowCodes, offsetX, offsetY, rowIdx, sectionIdx}) {
-      const cellWidth = this.cellWidths.cellWidth
-      const cellHeight = this.topMargin
+  drawLostLineStatusCell({ctx, rowCodes, offsetX, offsetY, rowIdx, sectionIdx, cellWidth, cellHeight}) {
       const dataLength = this.computedData.length
       const trendIsShowLoseNum = this.trendIsShowLoseNum
       const trendIsShowLoseLine = this.trendIsShowLoseLine
 
-      //extradata
-      const lostCombosArr = this.extraData.lostComboStatus
+      //data
+      const lostCombosArr = this.data.lostComboStatus
       if (!lostCombosArr) {
-          throw "can't find lostCombos in extraData."
+          throw "can't find lostCombos in data."
       }
 
       rowCodes.forEach((arr, cellIdx) => {
@@ -139,19 +133,17 @@ export const Drawer = {
       return cellWidth * rowCodes.length + 1
   },
   /** 繪製帶遺漏條及走勢線的格子 */
-  drawLostLineCell({ctx, rowCodes, offsetX, offsetY, rowIdx, sectionIdx}) {
-      const cellWidth = this.getCellWidth(sectionIdx)
-      const cellHeight = this.cellHeight
+  drawLostLineCell({ctx, rowCodes, offsetX, offsetY, rowIdx, sectionIdx, cellWidth, cellHeight}) {
       const dataLength = this.list.length
       const trendIsShowLoseNum = true //this.trendIsShowLoseNum
       const trendIsShowLoseLine = true //this.trendIsShowLoseLine
 
-      //extradata
-      const lostCombosArr = this.extraData.lostCombos
-      const numHeatArr = [2,0,1,0,1,0,2,0,2] //this.extraData.numHeat
-      const hitNumsArr = this.extraData.hitNums
+      //data
+      const lostCombosArr = this.data.lostCombos
+      const numHeatArr = this.data.numHeat
+      const hitNumsArr = this.data.hitNums
       if (!lostCombosArr || !numHeatArr || !hitNumsArr) {
-          throw "can't find lostCombos or numHeat or hitNumsArr in extraData."
+          throw "can't find lostCombos or numHeat or hitNumsArr in data."
       }
 
       rowCodes.forEach((code, cellIdx) => {
@@ -167,7 +159,7 @@ export const Drawer = {
           let hitBallParams = []
 
           // if (code === 0) { //hit
-          if (cellIdx == rowIdx%5) {
+          if (cellIdx == rowIdx % 5) {
               const num = cellIdx + 2
               const numHeat = numHeatArr[num]
               const colors = ['DeepSkyBlue', 'orange', 'red']
@@ -194,8 +186,6 @@ export const Drawer = {
   },
   /**繪製六合彩球號格 */
   drawMark6Num(ctx, rowCodes, offsetX, offsetY) {
-      const cellWidth = this.cellWidths.cellWidth
-      const cellHeight = this.topMargin
       rowCodes.forEach((row, cellIdx) => {
           // code could be 'text' or ['text', 'color']
           const gridOffset = (cellIdx === rowCodes.length - 1) ? 0 : 1
@@ -233,11 +223,11 @@ export const Drawer = {
   /** 繪製走勢線 */
   drawTrendLine() {
       const cellHeight = this.cellHeight
-      const hitNums = this.extraData.hitNums
+      const hitNums = this.data.hitNums
       const trendIsShowLine = true //this.trendIsShowLine
       const trendIsShowBallsWarn = true //this.trendIsShowBallsWarn
       if (!hitNums) {
-          throw 'can\'t find hitNums in extraData.'
+          throw 'can\'t find hitNums in data.'
       }
       const drawLine = (from, to) => {
           if (!from || !to) return

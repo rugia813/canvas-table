@@ -32,6 +32,11 @@ const canvasTable = new CanvasTable({
   defaultFontSize: 8,
   headerText: headerData,
   list: [...contentData],
+  data: {
+    lostCombos: [5, 15, 2, 8, 1],
+    numHeat: [2, 0, 1, 0, 1, 0, 2, 0, 2],
+    hitNums: [],
+  }
   // list: [...Array(50).keys()].reduce((arr, e) => arr.concat(mockContentText), []),
 })
 
