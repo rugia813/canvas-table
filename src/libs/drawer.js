@@ -24,14 +24,12 @@ export const Drawer = {
   },
   
   /** 繪製有子層的區塊的格子 */
-  drawMultiSubColumnCell({ctx, rowCodes, offsetX, offsetY, sectionIdx, drawCellParams}) {
-      if (typeof rowCodes !== 'object') throw `error at 'drawMultiSubColumnCell'. Expecting an array or Section object, found: rowCodes: ${rowCodes}`
-      const cellHeight = this.cellHeight
+  drawMultiSubColumnCell({ctx, rowData, offsetX, offsetY, rowIdx, sectionIdx, cellWidth, cellHeight}, drawCellParams) {
+      if (typeof rowData !== 'object') throw `error at 'drawMultiSubColumnCell'. Expecting an array or Section object, found: rowData: ${rowData}`
       let totalWidth = 0
-      rowCodes.forEach((code, cellIdx) => {
+      rowData.forEach((code, cellIdx) => {
         // code could be 'text' or ['text', 'color']
-        const cellWidth = this.getCellWidth(sectionIdx)
-        const gridOffset = (cellIdx === rowCodes.length - 1) ? 0 : 1
+        const gridOffset = (cellIdx === rowData.length - 1) ? 0 : 1
         const text = (typeof code === 'object' && code[0]) || code
         const tColor = (typeof code === 'object' && code[1]) || 'black'
         this.drawCell({
@@ -52,13 +50,13 @@ export const Drawer = {
   },
   
   /** 繪製單一層的格子 */
-  drawSingleColumnCell({ctx, rowCodes, offsetX, offsetY, rowIdx, sectionIdx, cellWidth, cellHeight}) {
+  drawSingleColumnCell({ctx, rowData, offsetX, offsetY, rowIdx, sectionIdx, cellWidth, cellHeight}) {
       let cell, tColor, text
-      if (typeof rowCodes !== 'object') {
-          text = rowCodes
+      if (typeof rowData !== 'object') {
+          text = rowData
           tColor = 'black'
       } else {
-          cell = (typeof rowCodes[0] === 'object') ? rowCodes[0] : rowCodes
+          cell = (typeof rowData[0] === 'object') ? rowData[0] : rowData
           tColor = cell[1] || 'black'
           text = cell[0]
       }
@@ -75,7 +73,7 @@ export const Drawer = {
       return cellWidth + 1
   },
   /** 繪製球號格 */
-  drawBallCell({ctx, rowCodes, offsetX, offsetY, rowIdx, sectionIdx, cellWidth, cellHeight}) {
+  drawBallCell({ctx, rowData, offsetX, offsetY, rowIdx, sectionIdx, cellWidth, cellHeight}) {
 
     const drawCircle = () => {
         const x = offsetX + ((cellWidth - 1/*gridOffset*/) / 2)
@@ -91,49 +89,10 @@ export const Drawer = {
         drawBeforeText: drawCircle,
         tColor: 'white'
     }
-    return this.drawMultiSubColumnCell({ctx, rowCodes, offsetX, offsetY, rowIdx, sectionIdx, drawCellParams})
-  },
-  /** 繪製帶遺漏條的格子 */
-  drawLostLineStatusCell({ctx, rowCodes, offsetX, offsetY, rowIdx, sectionIdx, cellWidth, cellHeight}) {
-      const dataLength = this.computedData.length
-      const trendIsShowLoseNum = this.trendIsShowLoseNum
-      const trendIsShowLoseLine = this.trendIsShowLoseLine
-
-      //data
-      const lostCombosArr = this.data.lostComboStatus
-      if (!lostCombosArr) {
-          throw "can't find lostCombos in data."
-      }
-
-      rowCodes.forEach((arr, cellIdx) => {
-          const gridOffset = (cellIdx === rowCodes.length - 1) ? 0 : 1
-          const lastLoseCombo = lostCombosArr[cellIdx]
-          const isLosing = rowIdx >= (dataLength - lastLoseCombo)
-          const bgColor = (trendIsShowLoseLine && isLosing) ? 'lightgray' : 'white'
-          const text = arr[0]
-          let tColor = arr[1]
-          if (!trendIsShowLoseNum && typeof text === 'number') {
-              tColor = bgColor
-          }
-          let hitBallParams = []
-
-          this.drawCell({
-              ctx: ctx,
-              bgColor,
-              tColor,
-              text,
-              fx: offsetX,
-              fy: offsetY,
-              width: cellWidth - gridOffset,
-              height: cellHeight,
-              ...hitBallParams
-          })
-          offsetX += cellWidth
-      })
-      return cellWidth * rowCodes.length + 1
+    return this.drawMultiSubColumnCell(...arguments, drawCellParams)
   },
   /** 繪製帶遺漏條及走勢線的格子 */
-  drawLostLineCell({ctx, rowCodes, offsetX, offsetY, rowIdx, sectionIdx, cellWidth, cellHeight}) {
+  drawLostLineCell({ctx, rowData, offsetX, offsetY, rowIdx, sectionIdx, cellWidth, cellHeight}) {
       const dataLength = this.list.length
       const trendIsShowLoseNum = true //this.trendIsShowLoseNum
       const trendIsShowLoseLine = true //this.trendIsShowLoseLine
@@ -146,8 +105,8 @@ export const Drawer = {
           throw "can't find lostCombos or numHeat or hitNumsArr in data."
       }
 
-      rowCodes.forEach((code, cellIdx) => {
-          const gridOffset = (cellIdx === rowCodes.length - 1) ? 0 : 1
+      rowData.forEach((code, cellIdx) => {
+          const gridOffset = (cellIdx === rowData.length - 1) ? 0 : 1
           const isSum = false //cellIdx === 0
           const lastLoseCombo = lostCombosArr[cellIdx /*- 1*/] //1st cell is sum, so offset 1
           const isLosing = rowIdx >= (dataLength - lastLoseCombo)
@@ -182,43 +141,7 @@ export const Drawer = {
           })
           offsetX += cellWidth
       })
-      return cellWidth * rowCodes.length + 1
-  },
-  /**繪製六合彩球號格 */
-  drawMark6Num(ctx, rowCodes, offsetX, offsetY) {
-      rowCodes.forEach((row, cellIdx) => {
-          // code could be 'text' or ['text', 'color']
-          const gridOffset = (cellIdx === rowCodes.length - 1) ? 0 : 1
-          const text = row.code
-          const ballColor = row.color
-          const animal = (this.lotteryName === 'MARK6_SIN')? row.animal : this.$t(row.animal)
-          const fx = offsetX
-          const fy = offsetY
-          const width = cellWidth - gridOffset
-          const height = cellHeight
-
-          //bg
-          ctx.fillStyle = 'white'
-          ctx.fillRect(fx, fy, width, height)
-
-          //ball
-          const radius = 9
-          ctx.fillStyle = ballColor
-          ctx.beginPath()
-          ctx.arc(fx + (width / 3), fy + (height / 2), radius, 0, 2 * Math.PI)
-          ctx.fill()
-          //ballText
-          ctx.fillStyle = 'white'
-          ctx.fillText(text, fx + (width / 3), height / 2 + fy)
-
-          //animal
-          ctx.fillStyle = 'black'
-          // ctx.font = ctx.font.replace(/\d+px/, "16px");
-          ctx.fillText(animal, fx + (width / 1.5), height / 2 + fy)
-
-          offsetX += cellWidth
-      })
-      return cellWidth * rowCodes.length + 1
+      return cellWidth * rowData.length + 1
   },
   /** 繪製走勢線 */
   drawTrendLine() {

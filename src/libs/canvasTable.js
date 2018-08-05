@@ -18,7 +18,7 @@ class CanvasTable {
     this.defaultCellWidth = this.calcCellWidths()
     this.canvasArray = this.getCanvasArray()
   }
-  draw() {
+  draw(dom) {
     if (this.list.length === 0) throw 'no list data found'
     const ctxArr = []
     const cellHeight = this.cellHeight + 1
@@ -51,6 +51,12 @@ class CanvasTable {
     this.drawHeader(ctxArr[0], lowerTitleShouldWrap)
     this.drawContent({ctxArr})
     this.drawTrendLine({ctxArr})
+
+    if (dom) {
+      this.canvasArray.forEach((e) => {
+        dom.appendChild(e)
+      })
+    }
     return this.canvasArray
   }
   
@@ -154,7 +160,7 @@ class CanvasTable {
               }
               const cellWidth = this.getCellWidth(sectionIdx)
               const cellHeight = this.cellHeight
-              offsetX += this[drawFunc]({ctx: ctxArr[canvasIdx], rowCodes: content, offsetX, offsetY, rowIdx, sectionIdx, cellWidth, cellHeight})
+              offsetX += this[drawFunc]({ctx: ctxArr[canvasIdx], rowData: content, offsetX, offsetY, rowIdx, sectionIdx, cellWidth, cellHeight})
           } catch (e) {
               console.error(`error occured at "${this.headerText[sectionIdx - 1]}",\n draw function: "${drawFunc}"\n`, e)
           }
